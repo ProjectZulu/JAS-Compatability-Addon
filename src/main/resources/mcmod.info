@@ -1,0 +1,16 @@
+[
+{
+  "modid": "JASCompatability",
+  "name": "Just Another Spawner Compatibility Addon",
+  "description": "",
+  "version": "${version}",
+  "mcversion": "${mcversion}",
+  "url": "",
+  "updateUrl": "",
+  "authors": ["Crudedragos"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]
