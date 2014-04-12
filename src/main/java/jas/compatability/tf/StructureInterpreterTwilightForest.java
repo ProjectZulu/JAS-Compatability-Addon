@@ -13,7 +13,7 @@ import java.util.List;
 import net.minecraft.entity.EnumCreatureType;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.BiomeGenBase;
-import net.minecraft.world.biome.SpawnListEntry;
+import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import twilightforest.TFFeature;
 import twilightforest.TwilightForestMod;
 import twilightforest.world.ChunkProviderTwilightForest;
@@ -62,10 +62,10 @@ public class StructureInterpreterTwilightForest implements StructureInterpreter 
 
     @Override
     public String areCoordsStructure(World world, int xCoord, int yCoord, int zCoord) {
-        ChunkProviderTwilightForest chunkProviderTwilightForest = StructureInterpreterHelper.getInnerChunkProvider(world,
-                ChunkProviderTwilightForest.class);
+        ChunkProviderTwilightForest chunkProviderTwilightForest = StructureInterpreterHelper.getInnerChunkProvider(
+                world, ChunkProviderTwilightForest.class);
         if (chunkProviderTwilightForest != null) {
-            TFFeature nearestFeature = TFFeature.getNearestFeatureIncludeMore(xCoord >> 4, zCoord >> 4, world);
+            TFFeature nearestFeature = TFFeature.getNearestFeature(xCoord >> 4, zCoord >> 4, world);
 
             if (nearestFeature != TFFeature.nothing) {
                 MapGenTFMajorFeature mapGenTFMajorFeature;
