@@ -2,6 +2,7 @@ package jas.compatability.tf;
 
 import jas.api.StructureInterpreter;
 import jas.common.ReflectionHelper;
+import jas.common.spawner.biome.group.BiomeHelper;
 import jas.common.spawner.biome.structure.StructureInterpreterHelper;
 import jas.common.spawner.creature.handler.parsing.ParsingHelper;
 
@@ -16,13 +17,15 @@ import net.minecraft.world.biome.BiomeGenBase;
 import net.minecraft.world.biome.BiomeGenBase.SpawnListEntry;
 import twilightforest.TFFeature;
 import twilightforest.TwilightForestMod;
+import twilightforest.biomes.TFBiomeBase;
 import twilightforest.world.ChunkProviderTwilightForest;
 import twilightforest.world.MapGenTFMajorFeature;
 import twilightforest.world.TFWorld;
 
 public class StructureInterpreterTwilightForest implements StructureInterpreter {
-
+	public final String UNDERGROUND_STUCTURE_KEY_PREFIX = "structure_";
     private HashMap<String, Integer> featureNameToID = new HashMap<String, Integer>();
+    private HashMap<String, Integer> undergroundSpawnList = new HashMap<String, Integer>();
 
     @Override
     @SuppressWarnings({ "rawtypes", "unchecked" })
@@ -41,6 +44,11 @@ public class StructureInterpreterTwilightForest implements StructureInterpreter 
                 }
             }
         }
+		for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
+			if (biome != null && biome instanceof TFBiomeBase) {
+				collection.add(UNDERGROUND_STUCTURE_KEY_PREFIX + BiomeHelper.getPackageName(biome));
+			}
+		}
         return collection;
     }
 
@@ -48,15 +56,23 @@ public class StructureInterpreterTwilightForest implements StructureInterpreter 
     @SuppressWarnings({ "unchecked", "rawtypes" })
     public Collection<SpawnListEntry> getStructureSpawnList(String structureKey) {
         Collection<SpawnListEntry> collection = new ArrayList();
-
-        String[] keyParts = structureKey.split("_");
-        String featureName = keyParts[0];
-        int index = ParsingHelper.parseFilteredInteger(keyParts[1], -1, structureKey);
-        TFFeature feature = TFFeature.featureList[featureNameToID.get(featureName)];
-        for (EnumCreatureType creatureType : EnumCreatureType.values()) {
-            collection.addAll(feature.getSpawnableList(creatureType, index));
+        if(structureKey.startsWith(UNDERGROUND_STUCTURE_KEY_PREFIX)) {
+        	String underGroundBiome = structureKey.substring(UNDERGROUND_STUCTURE_KEY_PREFIX.length());
+			for (BiomeGenBase biome : BiomeGenBase.getBiomeGenArray()) {
+				if(biome != null && biome instanceof TFBiomeBase && underGroundBiome.equalsIgnoreCase(BiomeHelper.getPackageName(biome))) {
+					collection.addAll(((TFBiomeBase) biome).getUndergroundSpawnableList());
+					break;
+				}
+			}
+        } else {
+            String[] keyParts = structureKey.split("_");
+            String featureName = keyParts[0];
+            int index = ParsingHelper.parseFilteredInteger(keyParts[1], -1, structureKey);
+            TFFeature feature = TFFeature.featureList[featureNameToID.get(featureName)];
+            for (EnumCreatureType creatureType : EnumCreatureType.values()) {
+                collection.addAll(feature.getSpawnableList(creatureType, index));
+            }
         }
-
         return collection;
     }
 
@@ -68,6 +84,9 @@ public class StructureInterpreterTwilightForest implements StructureInterpreter 
             TFFeature nearestFeature = TFFeature.getNearestFeature(xCoord >> 4, zCoord >> 4, world);
 
             if (nearestFeature != TFFeature.nothing) {
+            	if (chunkProviderTwilightForest.isStructureConquered(xCoord, yCoord, zCoord)) {
+    				return null;
+    			}
                 MapGenTFMajorFeature mapGenTFMajorFeature;
                 mapGenTFMajorFeature = ReflectionHelper.getFieldFromReflection("majorFeatureGenerator",
                         chunkProviderTwilightForest, MapGenTFMajorFeature.class);
@@ -78,10 +97,11 @@ public class StructureInterpreterTwilightForest implements StructureInterpreter 
                 }
             }
 
-            if ((yCoord < TFWorld.SEALEVEL)) {
-                return TFFeature.underground.name + "_0";
-            }
-        }
+			BiomeGenBase biome = world.getBiomeGenForCoords(xCoord, zCoord);
+			if ((yCoord < TFWorld.SEALEVEL && (biome instanceof TFBiomeBase))) {
+				return UNDERGROUND_STUCTURE_KEY_PREFIX + BiomeHelper.getPackageName(biome);
+			}
+		}
         return null;
     }
 
