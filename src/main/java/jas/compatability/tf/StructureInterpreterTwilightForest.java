@@ -23,7 +23,7 @@ import twilightforest.world.MapGenTFMajorFeature;
 import twilightforest.world.TFWorld;
 
 public class StructureInterpreterTwilightForest implements StructureInterpreter {
-	public final String UNDERGROUND_STUCTURE_KEY_PREFIX = "structure_";
+	public final String UNDERGROUND_STUCTURE_KEY_PREFIX = "UG_SPAWNLIST_";
     private HashMap<String, Integer> featureNameToID = new HashMap<String, Integer>();
     private HashMap<String, Integer> undergroundSpawnList = new HashMap<String, Integer>();
 
